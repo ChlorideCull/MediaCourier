@@ -17,17 +17,17 @@ void* bindcallptr;
 // Socket construction prototype
 int socket(int domain, int type, int protocol) {
     if (sockcallptr == NULL) {
-        puts("Loading net redirect.\n");
+        fputs("Loading net redirect.\n", stderr);
         sockcallptr = dlsym(RTLD_NEXT, "socket");
         bindcallptr = dlsym(RTLD_NEXT, "bind");
     }
-    puts("Initialized socket as UNIX socket.");
+    fputs("Initialized socket as UNIX socket.\n", stderr);
     return ((sockcalldef)sockcallptr)(AF_UNIX, type, PF_UNIX);
 }
 
 // Socket bind prototype
 int bind(int socket, const struct sockaddr *address, socklen_t address_len) {
-    puts("Binding UNIX socket.");
+    fputs("Binding UNIX socket.\n", stderr);
     char* targetpath = getenv("MCNETREDIR_SOCKPATH");
     if (targetpath == NULL)
         return -1;
