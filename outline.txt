@@ -1,0 +1,5 @@
+launch sub instances of ffmpeg to handle individual encodes
+set LD_PRELOAD to libMCNetRedir.so, and set MCNETREDIR_SOCKPATH to a path which ffmpeg will listen on
+
+handle RTMP handshake and check app name (rtmp://xxxx/appname/instancename) because instancename is too late in the
+handshake, while appname is sent in connect command
