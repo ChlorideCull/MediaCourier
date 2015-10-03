@@ -22,7 +22,7 @@ int socket(int domain, int type, int protocol) {
         bindcallptr = dlsym(RTLD_NEXT, "bind");
     }
     fputs("Initialized socket as UNIX socket.\n", stderr);
-    return ((sockcalldef)sockcallptr)(AF_UNIX, type, PF_UNIX);
+    return ((sockcalldef)sockcallptr)(AF_UNIX, type, 0);
 }
 
 // Socket bind prototype
