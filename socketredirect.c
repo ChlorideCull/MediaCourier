@@ -21,16 +21,18 @@ int socket(int domain, int type, int protocol) {
         sockcallptr = dlsym(RTLD_NEXT, "socket");
         bindcallptr = dlsym(RTLD_NEXT, "bind");
     }
-    fputs("Initialized socket as UNIX socket.\n", stderr);
-    return ((sockcalldef)sockcallptr)(AF_UNIX, type, 0);
+    fprintf(stderr, "Initialized socket as UNIX socket (app wanted %i %i %i, created %i %i %i)\n",
+            domain, type, protocol,
+            AF_UNIX, SOCK_STREAM, 0);
+    return ((sockcalldef)sockcallptr)(AF_UNIX, SOCK_STREAM, 0);
 }
 
 // Socket bind prototype
 int bind(int socket, const struct sockaddr *address, socklen_t address_len) {
-    fputs("Binding UNIX socket.\n", stderr);
     char* targetpath = getenv("MCNETREDIR_SOCKPATH");
     if (targetpath == NULL)
         return -1;
+    fprintf(stderr, "Binding UNIX socket on %s\n", targetpath);
     struct sockaddr_un *newaddr = malloc(sizeof(struct sockaddr_un));
     memset(newaddr, 0, sizeof(struct sockaddr_un));
     newaddr->sun_family = AF_UNIX;

@@ -34,7 +34,14 @@ std::list<std::thread*> threads;
 
 int main() {
     std::cout << "Loading MediaCourier Server Node..." << std::endl;
+#ifdef DEBUG
+    std::cout << " Debug build! Do not run in production, ever, ever, EVER!" << std::endl;
+    std::cout << "  Adding KEY-PONKAPONKAPONKAPONKAPONKAPONKAPO-K as a valid key." << std::endl;
+    validkeyusermap["PONKAPONKAPONKAPONKAPONKAPONKAPO-K"] = "Pinkie Pie";
+#endif
     std::cout << " Creating RTMP listener..." << std::endl;
+
+    srand(time(nullptr));
 
     int rtmpsock = socket(FAMILY_CONST, SOCK_STREAM, 0);
     if (rtmpsock == -1) {
@@ -78,8 +85,12 @@ int main() {
             inet_ntop(FAMILY_CONST, &cliaddr->STRUCT_ADDR, prettyaddr, cliaddrlen);
             std::cout << " New connection from " << prettyaddr << " on port " << ntohs(cliaddr->STRUCT_PORT) << std::endl;
         }
-        threads.insert(threads.cend(), new std::thread([&clisock]() {
-
+        threads.insert(threads.cend(), new std::thread([&]() {
+            StreamProcess* proc = new StreamProcess(clisock, &streams, &validkeyusermap);
+            streams.insert(streams.end(), proc);
+            proc->RunStreamProcesses();
+            streams.remove(proc);
+            delete proc;
         }));
         /*TODO: Check if pointer in streammap is null, if so...
          *      Create StreamProcess instance with relevant config, add to streammap, run CreateProcesses on separate

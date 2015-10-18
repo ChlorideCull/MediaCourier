@@ -8,8 +8,10 @@
 #include <sys/un.h>
 #include <thread>
 #include <fcntl.h>
+#include <unistd.h>
 #include "StreamProcess.hpp"
 #include "Util.hpp"
+#include "DBGUtils.hpp"
 
 StreamProcess::StreamProcess(int Connection, std::list<StreamProcess*> *ExistingStreams,
                              std::unordered_map<std::string, std::string>* KUMap) {
@@ -21,9 +23,10 @@ StreamProcess::StreamProcess(int Connection, std::list<StreamProcess*> *Existing
 
 void StreamProcess::RunStreamProcesses() {
     // Setup master RTMP input
+    std::string connsuffix = std::to_string(connid) + "_" + std::to_string(rand());
     std::cout << "  Firing up master ffmpeg decoder instance, and eavesdropping for stream key." << std::endl;
     int masterffmpegsocket = socket(AF_UNIX, SOCK_STREAM, 0);
-    std::array<int, 3> baseproc = Util::LaunchSubprocess("ffmpeg", {
+    std::array<int, 3> baseproc = Util::LaunchSubprocess("ffmpeg", { "ffmpeg", "-v", "debug",
                                                                  "-rtmp_listen", "1", "-rtmp_live", "1",
                                                                  "-i", "rtmp://203.0.113.13/mediacourier/unknown_stream",
                                                                  "-f", "mpegts", "-strict", "experimental",
@@ -31,43 +34,63 @@ void StreamProcess::RunStreamProcesses() {
                                                                  "-c:v", "libx264", "-preset", "ultrafast", "-qp", "0",
                                                                  "pipe://"
                                                          }, {
-                                                                 std::make_pair(
-                                                                         "MCNETREDIR_SOCKPATH",
-                                                                         "/tmp/mediacourier-" + std::to_string(connid)
-                                                                 ), std::make_pair(
-                                                                         "LD_PRELOAD",
-                                                                         "libMCNetRedir.so"
-                                                                 )
+                                                                 "MCNETREDIR_SOCKPATH=/tmp/mediacourier-" + connsuffix,
+                                                                 std::string("LD_PRELOAD=") + BINDIR + "/libMCNetRedir.so"
                                                          });
+    // Connect to the ffmpeg RTMP unix socket
     sockaddr_un sockpath;
     memset(&sockpath, 0, sizeof(sockaddr_un));
     sockpath.sun_family = AF_UNIX;
-    strcpy(sockpath.sun_path, ("/tmp/mediacourier-" + std::to_string(connid)).c_str());
-    if (connect(masterffmpegsocket, (sockaddr*)&sockpath, sizeof(sockaddr_un)) == -1)
-        throw std::runtime_error("Failed to connect to ffmpeg master! " + std::string(strerror(errno)));
-    std::thread([this, masterffmpegsocket](){
-        PassMasterStream(connid, masterffmpegsocket);
-    });
+    strcpy(sockpath.sun_path, ("/tmp/mediacourier-" + connsuffix).c_str());
+    char stderrbuf[2048];
+    while (true) {
+        std::cerr << std::string(stderrbuf, read(baseproc[2], stderrbuf, 2047));
+        if (connect(masterffmpegsocket, (sockaddr*)&sockpath, sizeof(sockaddr_un)) == -1) {
+            if (errno != ENOENT)
+                throw std::runtime_error("Failed to connect to ffmpeg master! " + std::string(strerror(errno)));
+        } else {
+            break;
+        }
+        std::this_thread::sleep_for(std::chrono::duration<int, std::milli>(50));
+    }
+
+    PassMasterStream(connid, masterffmpegsocket, baseproc[2]);
 }
 
-void StreamProcess::PassMasterStream(int outside, int ffmpeg) {
-    fcntl(outside, F_SETFL, fcntl(outside, F_GETFL) & O_NONBLOCK);
-    fcntl(ffmpeg, F_SETFL, fcntl(ffmpeg, F_GETFL) & O_NONBLOCK);
+void StreamProcess::PassMasterStream(const int outside, const int ffmpeg, const int ffmpegstderr) {
+    DBGPRINT("Beginning to pass stream " + std::to_string(outside) + " from outside to " + std::to_string(ffmpeg) + ".");
+    fcntl(outside, F_SETFL, fcntl(outside, F_GETFL) | O_NONBLOCK);
+    fcntl(ffmpeg, F_SETFL, fcntl(ffmpeg, F_GETFL) | O_NONBLOCK);
+    fcntl(ffmpegstderr, F_SETFL, fcntl(ffmpegstderr, F_GETFL) | O_NONBLOCK);
+    char stderrbuf[2048];
     char packettmp[4096];
     ssize_t recvpackets = 0;
     while (true) {
+        ssize_t errreadlen = read(ffmpegstderr, stderrbuf, 2047);
+        if (errreadlen == -1) {
+            if (errno != EWOULDBLOCK)
+                throw std::runtime_error("File read failed from ffmpeg stderr! " + std::string(strerror(errno)));
+        } else {
+            std::cerr << std::string(stderrbuf, errreadlen);
+        }
         // outside -> ffmpeg
         recvpackets = recv(outside, packettmp, 4096, 0);
         if (recvpackets == -1) {
             if (errno != EWOULDBLOCK)
-                throw std::runtime_error("Socket read failed from outside to ffmpeg!" + std::string(strerror(errno)));
+                throw std::runtime_error("Socket read failed from outside to ffmpeg! " + std::string(strerror(errno)));
         } else if (recvpackets == 0) {
+            DBGPRINT("Connection to outside was cut.");
             shutdown(ffmpeg, SHUT_RDWR);
             shutdown(outside, SHUT_RDWR);
             break;
+        } else {
+            DBGPRINT("Got " + std::to_string(recvpackets) + " packets from outside.");
+            if (send(ffmpeg, packettmp, recvpackets, 0) == -1) {
+                throw std::runtime_error("Socket write failed from outside to ffmpeg! " + std::string(strerror(errno)));
+            } else {
+                DBGPRINT("Sent " + std::to_string(recvpackets) + " packets to ffmpeg.");
+            }
         }
-        if (send(ffmpeg, packettmp, recvpackets, 0) == -1)
-            throw std::runtime_error("Socket write failed from outside to ffmpeg!" + std::string(strerror(errno)));
 
         // see if we can find an FCPublish command with a key, if we haven't already
         if (StreamName == "") {
@@ -108,10 +131,13 @@ void StreamProcess::PassMasterStream(int outside, int ffmpeg) {
                             }
                         }
                     }
-                    std::cout << "  But we didn't find a key." << std::endl;
-                    shutdown(ffmpeg, SHUT_RDWR);
-                    shutdown(outside, SHUT_RDWR);
-                    return;
+
+                    if (StreamName == "") {
+                        std::cout << "  But we didn't find a key." << std::endl;
+                        shutdown(ffmpeg, SHUT_RDWR);
+                        shutdown(outside, SHUT_RDWR);
+                        return;
+                    }
                 }
             }
         }
@@ -120,13 +146,19 @@ void StreamProcess::PassMasterStream(int outside, int ffmpeg) {
         recvpackets = recv(ffmpeg, packettmp, 4096, 0);
         if (recvpackets == -1) {
             if (errno != EWOULDBLOCK)
-                throw std::runtime_error("Socket read failed from ffmpeg to outside!" + std::string(strerror(errno)));
+                throw std::runtime_error("Socket read failed from ffmpeg to outside! " + std::string(strerror(errno)));
         } else if (recvpackets == 0) {
+            DBGPRINT("Connection to ffmpeg was cut.");
             shutdown(ffmpeg, SHUT_RDWR);
             shutdown(outside, SHUT_RDWR);
             break;
+        } else {
+            DBGPRINT("Got " + std::to_string(recvpackets) + " packets from ffmpeg.");
+            if (send(outside, packettmp, recvpackets, 0) == -1) {
+                throw std::runtime_error("Socket write failed from ffmpeg to outside! "  + std::string(strerror(errno)));
+            } else {
+                DBGPRINT("Sent " + std::to_string(recvpackets) + " packets to outside.");
+            }
         }
-        if (send(outside, packettmp, recvpackets, 0) == -1)
-            throw std::runtime_error("Socket write failed from ffmpeg to outside!" + std::string(strerror(errno)));
     }
 }

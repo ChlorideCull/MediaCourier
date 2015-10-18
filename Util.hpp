@@ -16,7 +16,7 @@ class Util {
 
 public:
     static std::array<int, 3> LaunchSubprocess(std::string Path, std::vector<std::string> Args,
-                                            std::vector<std::pair<std::string, std::string>> Env);
+                                               std::vector<std::string> Env);
 };
 
 

@@ -13,7 +13,7 @@ private:
     int connid;
     std::list<StreamProcess*>* streamlists;
     std::unordered_map<std::string, std::string>* keyusermap;
-    void PassMasterStream(int outside, int ffmpeg);
+    void PassMasterStream(int outside, int ffmpeg, int ffmpegstderr);
 public:
     std::string StreamName;
     StreamProcess(int Connection, std::list<StreamProcess*> *ExistingStreams,
