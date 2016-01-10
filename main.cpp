@@ -32,12 +32,15 @@ std::unordered_map<std::string, std::string> validkeyusermap;
 std::list<StreamProcess*> streams;
 std::list<std::thread*> threads;
 
+
 int main() {
     std::cout << "Loading MediaCourier Server Node..." << std::endl;
 #ifdef DEBUG
     std::cout << " Debug build! Do not run in production, ever, ever, EVER!" << std::endl;
     std::cout << "  Adding KEY-PONKAPONKAPONKAPONKAPONKAPONKAPO-K as a valid key." << std::endl;
     validkeyusermap["PONKAPONKAPONKAPONKAPONKAPONKAPO-K"] = "Pinkie Pie";
+#else
+    
 #endif
     std::cout << " Creating RTMP listener..." << std::endl;
 

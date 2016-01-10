@@ -7,11 +7,15 @@
 #include <string.h>
 #include <sys/un.h>
 #include <thread>
+#include <chrono>
 #include <fcntl.h>
 #include <unistd.h>
 #include "StreamProcess.hpp"
 #include "Util.hpp"
 #include "DBGUtils.hpp"
+
+#define CHILDPASSBUFSIZE 4*1024*1024
+#define MAINPASSBUFSIZE 1*1024*1024
 
 StreamProcess::StreamProcess(int Connection, std::list<StreamProcess*> *ExistingStreams,
                              std::unordered_map<std::string, std::string>* KUMap) {
@@ -19,6 +23,7 @@ StreamProcess::StreamProcess(int Connection, std::list<StreamProcess*> *Existing
     streamlists = ExistingStreams;
     keyusermap = KUMap;
     StreamName = "";
+    killThread = false;
 }
 
 void StreamProcess::RunStreamProcesses() {
@@ -54,7 +59,44 @@ void StreamProcess::RunStreamProcesses() {
         std::this_thread::sleep_for(std::chrono::duration<int, std::milli>(50));
     }
 
+    std::thread* childProc = new std::thread([&](){
+        char childdatabuf[CHILDPASSBUFSIZE];
+        while (!killThread) {
+            ssize_t dataread = read(baseproc[1], childdatabuf, CHILDPASSBUFSIZE);
+            DBGPRINT("Swallowed " + std::to_string(dataread) + " bytes.");
+        }
+    });
     PassMasterStream(connid, masterffmpegsocket, baseproc[2]);
+    killThread = true;
+    if (childProc->joinable())
+        childProc->join();
+    delete childProc;
+}
+
+ssize_t passSocket(char* packettmp, std::string sfrom, int from, std::string sto, int to) {
+    ssize_t recvpackets = recv(from, packettmp, MAINPASSBUFSIZE, 0);
+    if (recvpackets == -1) {
+        if ((errno != EWOULDBLOCK) && (errno != EAGAIN))
+            throw std::runtime_error("Socket read failed from " + sfrom + " to " + sto + "! " + std::string(strerror(errno)));
+        else
+            return 0;
+    } else if (recvpackets == 0) {
+        DBGPRINT("Connection to " + sfrom + " was cut.");
+        shutdown(to, SHUT_RDWR);
+        shutdown(from, SHUT_RDWR);
+        return -1;
+    } else {
+        DBGPRINT("Got " + std::to_string(recvpackets) + " packets from " + sfrom + ".");
+        ssize_t sentpackets = -1;
+        while (sentpackets == -1) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            sentpackets = send(to, packettmp, recvpackets, 0);
+            if ((sentpackets == -1) && (errno != EWOULDBLOCK) && (errno != EAGAIN))
+                throw std::runtime_error("Socket write failed from " + sfrom + " to " + sto + "! " + std::string(strerror(errno)) + "(" + std::to_string(errno) + ")");
+        }
+        DBGPRINT("Sent " + std::to_string(recvpackets) + " packets to " + sto + ".");
+    }
+    return recvpackets;
 }
 
 void StreamProcess::PassMasterStream(const int outside, const int ffmpeg, const int ffmpegstderr) {
@@ -62,35 +104,20 @@ void StreamProcess::PassMasterStream(const int outside, const int ffmpeg, const 
     fcntl(outside, F_SETFL, fcntl(outside, F_GETFL) | O_NONBLOCK);
     fcntl(ffmpeg, F_SETFL, fcntl(ffmpeg, F_GETFL) | O_NONBLOCK);
     fcntl(ffmpegstderr, F_SETFL, fcntl(ffmpegstderr, F_GETFL) | O_NONBLOCK);
+    char packettmp[MAINPASSBUFSIZE];
     char stderrbuf[2048];
-    char packettmp[4096];
-    ssize_t recvpackets = 0;
     while (true) {
         ssize_t errreadlen = read(ffmpegstderr, stderrbuf, 2047);
         if (errreadlen == -1) {
-            if (errno != EWOULDBLOCK)
+            if ((errno != EWOULDBLOCK) && (errno != EAGAIN))
                 throw std::runtime_error("File read failed from ffmpeg stderr! " + std::string(strerror(errno)));
         } else {
             std::cerr << std::string(stderrbuf, errreadlen);
         }
         // outside -> ffmpeg
-        recvpackets = recv(outside, packettmp, 4096, 0);
-        if (recvpackets == -1) {
-            if (errno != EWOULDBLOCK)
-                throw std::runtime_error("Socket read failed from outside to ffmpeg! " + std::string(strerror(errno)));
-        } else if (recvpackets == 0) {
-            DBGPRINT("Connection to outside was cut.");
-            shutdown(ffmpeg, SHUT_RDWR);
-            shutdown(outside, SHUT_RDWR);
+        ssize_t recvpackets = passSocket(packettmp, "outside", outside, "ffmpeg", ffmpeg);
+        if (recvpackets == -1)
             break;
-        } else {
-            DBGPRINT("Got " + std::to_string(recvpackets) + " packets from outside.");
-            if (send(ffmpeg, packettmp, recvpackets, 0) == -1) {
-                throw std::runtime_error("Socket write failed from outside to ffmpeg! " + std::string(strerror(errno)));
-            } else {
-                DBGPRINT("Sent " + std::to_string(recvpackets) + " packets to ffmpeg.");
-            }
-        }
 
         // see if we can find an FCPublish command with a key, if we haven't already
         if (StreamName == "") {
@@ -143,22 +170,8 @@ void StreamProcess::PassMasterStream(const int outside, const int ffmpeg, const 
         }
 
         // ffmpeg -> outside
-        recvpackets = recv(ffmpeg, packettmp, 4096, 0);
-        if (recvpackets == -1) {
-            if (errno != EWOULDBLOCK)
-                throw std::runtime_error("Socket read failed from ffmpeg to outside! " + std::string(strerror(errno)));
-        } else if (recvpackets == 0) {
-            DBGPRINT("Connection to ffmpeg was cut.");
-            shutdown(ffmpeg, SHUT_RDWR);
-            shutdown(outside, SHUT_RDWR);
+        recvpackets = passSocket(packettmp, "ffmpeg", ffmpeg, "outside", outside);
+        if (recvpackets == -1)
             break;
-        } else {
-            DBGPRINT("Got " + std::to_string(recvpackets) + " packets from ffmpeg.");
-            if (send(outside, packettmp, recvpackets, 0) == -1) {
-                throw std::runtime_error("Socket write failed from ffmpeg to outside! "  + std::string(strerror(errno)));
-            } else {
-                DBGPRINT("Sent " + std::to_string(recvpackets) + " packets to outside.");
-            }
-        }
     }
 }

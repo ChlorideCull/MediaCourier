@@ -7,9 +7,11 @@
 #include <string>
 #include <list>
 #include <unordered_map>
+#include <atomic>
 
 class StreamProcess {
 private:
+    std::atomic<bool> killThread;
     int connid;
     std::list<StreamProcess*>* streamlists;
     std::unordered_map<std::string, std::string>* keyusermap;

@@ -30,10 +30,10 @@ std::array<int, 3> Util::LaunchSubprocess(std::string Path, std::vector<std::str
         // Juggle data to make it fit execvpe()
         const char* cargs[Args.size()+1];
         const char* cenv[Env.size()+1];
-        for (int i = 0; i < Args.size(); ++i) {
+        for (unsigned int i = 0; i < Args.size(); ++i) {
             cargs[i] = Args[i].c_str();
         }
-        for (int i = 0; i < Env.size(); ++i) {
+        for (unsigned int i = 0; i < Env.size(); ++i) {
             cenv[i] = Env[i].c_str();
         }
         cargs[Args.size()] = nullptr;
