@@ -1,11 +1,27 @@
 cmake_minimum_required(VERSION 3.3)
+
+# Guard against multiple includes
 if(PRIMARY_INC)
-    set(SOURCE_FILES main.cpp StreamProcess.cpp StreamProcess.hpp Util.cpp Util.hpp)
-    add_definitions(-DBINDIR=\"${CMAKE_CURRENT_BINARY_DIR}\")
-    add_executable(MediaCourier-TransmissionServer ${SOURCE_FILES} ${HIVE_PROTO_CPP_SRCS} ${HIVE_PROTO_CPP_HDRS})
-    add_dependencies(MediaCourier-TransmissionServer HiveProtobuf MCNetRedir)
-    target_link_libraries(MediaCourier-TransmissionServer -lpthread ${PROTOBUF_LIBRARIES})
-    add_library(MCNetRedir SHARED socketredirect.c)
+	return()
 else()
-    message(FATAL_ERROR "Your IDE is incorrectly configured. Please make it execute the CMakeLists.txt in the parent directory.")
+	set(PRIMARY_INC ON)
 endif()
+
+project(MediaCourier)
+
+# Global options
+option(PREFIPV6 "Use IPv6 instead of IPv4" ON)
+
+# Set global defaults
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+if(PREFIPV6)
+	add_definitions(-DUSE_IPV6)
+endif()
+if(CMAKE_BUILD_TYPE EQUAL Debug)
+	add_definitions(-DDEBUG)
+	add_compile_options(-O0 -Wall -Werror)
+endif()
+
+add_subdirectory(Shared/)
+add_subdirectory(MC-TransmissionServer/)
+

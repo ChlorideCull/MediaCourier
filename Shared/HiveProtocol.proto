@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package MediaCourier.HiveProtocol;
+
+message AuthRequest {
+    string Name = 1;
+}
+
+message AuthInfo {
+    string UniqueID = 1;
+}
+
+message AttachedUsersRequest {
+    AuthInfo Authentication = 1;
+}
+
+message UserDetailsRequest {
+    AuthInfo Authentication = 1;
+    oneof RequestQuery {
+        string UserID = 2;
+        string AuthKey = 3;
+    }
+}
+
+message AttachedUsersResponse {
+	map<string, string> KeyUserMap = 1;
+}
+
+message UserDetailsResponse {
+	string UserID = 1;
+	string AuthKey = 2;
+	message FFmpegCmd {
+		string InputPathReplaceToken = 1;
+		string OutputPathReplaceToken = 2;
+		repeated string Arguments = 3;
+	}
+	repeated FFmpegCmd Streams = 3;
+}
+
+service HiveService {
+    rpc Auth (AuthRequest) returns (AuthInfo);
+    rpc GetAttachedUsers (AttachedUsersRequest) returns (AttachedUsersResponse);
+    rpc GetUserDetails (UserDetailsRequest) returns (UserDetailsResponse);
+}
