@@ -13,10 +13,10 @@ add_custom_command(TARGET HiveProtobuf POST_BUILD
         COMMAND cp ${HIVE_PROTO_CPP_SRCS} ${HIVE_PROTO_CPP_HDRS} ${HIVE_PROTO_PY} ${CMAKE_CURRENT_BINARY_DIR}/HiveProtocol)
 
 install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/HiveProtocol/
-        DESTINATION "${CMAKE_INSTALL_LIBDIR}/MediaCourier/HiveProtobuf/"
+        DESTINATION "${CMAKE_INSTALL_LIBDIR}/MediaCourier/HiveProtobuf"
         COMPONENT HiveProtobuf
         PATTERN "*.py" EXCLUDE)
 install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/HiveProtocol/
-        DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/MediaCourier/HiveProtobuf/"
+        DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/MediaCourier/HiveProtobuf"
         COMPONENT HiveProtobuf
         FILES_MATCHING PATTERN "*.py")
