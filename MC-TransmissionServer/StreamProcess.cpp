@@ -20,7 +20,9 @@
 StreamProcess::StreamProcess(int Connection, std::list<StreamProcess*> *ExistingStreams,
                              std::unordered_map<std::string, std::string>* KUMap) {
     connid = Connection;
+    // TODO: Just ask the Hive if the user is streaming already, instead.
     streamlists = ExistingStreams;
+    // TODO: Look into replacing the KeyUser map, instead querying the Hive for the corresponding user when we get a key
     keyusermap = KUMap;
     StreamName = "";
     killThread = false;
@@ -63,6 +65,9 @@ void StreamProcess::RunStreamProcesses() {
         char childdatabuf[CHILDPASSBUFSIZE];
         while (!killThread) {
             ssize_t dataread = read(baseproc[1], childdatabuf, CHILDPASSBUFSIZE);
+            for (auto subproc = subprocesses.begin(); subproc != subprocesses.end(); subproc++) {
+                // TODO: Pass the data to child processes initialized with the arguments from the config we got from the hive when we authenticated the streamer.
+            }
             DBGPRINT("Swallowed " + std::to_string(dataread) + " bytes.");
         }
     });

@@ -15,6 +15,7 @@ private:
     int connid;
     std::list<StreamProcess*>* streamlists;
     std::unordered_map<std::string, std::string>* keyusermap;
+    std::list<std::array<int, 3>> subprocesses;
     void PassMasterStream(int outside, int ffmpeg, int ffmpegstderr);
 public:
     std::string StreamName;
