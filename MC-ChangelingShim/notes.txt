@@ -1,0 +1,7 @@
+RTMP URL now in the format of rtmp://<hostname>/live/<key>
+This ends up at the FCGI server as "name" inside the QUERY_STRING of the parameters
+
+First argument of MediaCourier-ChangelingShim can be three modes
+* fcgi - starts an FastCGI authenticator
+* start-publish - connects to, and forwards an incoming stream to their defined remotes
+* finalize-recording - convert saved flv in the background to a more optimized format for storing VODs

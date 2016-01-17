@@ -7,9 +7,10 @@ Media Courier is a streaming server designed by Media Courier UF, a company in t
 ##Components
 The Media Courier suite is split into three programs, maintaining different roles:
 
-* `MC-TransmissionServer` - server that handles incoming RTMP streams, media decoding and encoding, and other media-related work.
-* `MC-HiveServer` - server that handles user authentication, and transmission server management.
-* `MC-WebUI` - server that serves a Web UI for public streams and end-user configuration.
+* `MC-TransmissionServer` - Obsolete server that handles incoming RTMP streams, media decoding and encoding, and other media-related work. Has been replaced by `MC-ChangelingShim`.
+* `MC-ChangelingShim` - New edge server which utilizes [nginx-rtmp-module](https://github.com/arut/nginx-rtmp-module/) for the heavy work. It essentially only handles authentication and minor features.
+* `MC-HiveServer` - Server that handles user authentication, and transmission server management.
+* `MC-WebUI` - Server that serves a Web UI for public streams and end-user configuration.
 
 You can have multiple transmission servers and Web UI servers, but only one hive.
 

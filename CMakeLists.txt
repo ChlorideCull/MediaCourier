@@ -22,4 +22,5 @@ if(PREFIPV6)
 endif()
 
 add_subdirectory(Shared/)
+add_subdirectory(MC-ChangelingShim/)
 add_subdirectory(MC-TransmissionServer/)
