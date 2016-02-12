@@ -12,6 +12,7 @@ include(GNUInstallDirs)
 
 # Global options
 option(PREFIPV6 "Use IPv6 instead of IPv4" ON)
+option(BUILDTS "Build the obsolete Transmission Server" OFF)
 
 # Set global defaults
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -23,4 +24,7 @@ endif()
 
 add_subdirectory(Shared/)
 add_subdirectory(MC-ChangelingShim/)
-add_subdirectory(MC-TransmissionServer/)
+if(BUILDTS)
+	message(WARNING "MC-TransmissionServer is deprecated and replaced by MC-ChangelingShim. It may be removed in the future.")
+	add_subdirectory(MC-TransmissionServer/)
+endif()

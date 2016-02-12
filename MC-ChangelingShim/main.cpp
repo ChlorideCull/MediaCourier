@@ -4,6 +4,7 @@
 
 #include <cstring>
 #include <iostream>
+#include "fcgi_main.h"
 
 using namespace std;
 
@@ -17,7 +18,7 @@ int main(int argc, char* argv[]) {
     if (argc < 2)
         print_usage();
     if (strcmp(argv[1], "fcgi")) {
-        //TODO: Launch FCGI server
+        fcgi_main();
     } else if (strcmp(argv[1], "start-publish")) {
         //TODO: Contact Hive to get ffmpeg arguments, and launch them
     } else if (strcmp(argv[1], "finalize-recording")) {

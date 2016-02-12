@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.3)
 if(PRIMARY_INC)
-    set(SOURCE_FILES main.cpp)
-    add_definitions(-DBINDIR=\"${CMAKE_CURRENT_BINARY_DIR}\")
-    add_executable(MediaCourier-ChangelingShim ${SOURCE_FILES} ${HIVE_PROTO_CPP_SRCS} ${HIVE_PROTO_CPP_HDRS})
+    set(SOURCE_FILES main.cpp fcgi_main.cpp)
+    include_directories(${CMAKE_CURRENT_BINARY_DIR}/../Shared/)
+    add_executable(MediaCourier-ChangelingShim ${SOURCE_FILES} ${HIVE_PROTO_CPP_SRCS})
     add_dependencies(MediaCourier-ChangelingShim HiveProtobuf)
     target_link_libraries(MediaCourier-ChangelingShim ${PROTOBUF_LIBRARIES})
 
