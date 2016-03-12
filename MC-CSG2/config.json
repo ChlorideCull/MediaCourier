@@ -1,0 +1,32 @@
+{
+    "version": 2,
+    "site": {
+        "title": "Media Courier UF",
+        "additional_code": "mcufmgmt.py",
+        "theme": "thinandtall",
+        "domain_name": "beta.mediacourier.work"
+    },
+    "pages": [
+        {
+            "title": "Home",
+            "path": "index",
+            "link_elements": [],
+            "hidden": false,
+            "require_auth": false
+        },
+        {
+            "title": "Settings",
+            "path": "conf",
+            "link_elements": [],
+            "hidden": false,
+            "require_auth": true
+        },
+        {
+            "title": "Watch",
+            "path": "watch",
+            "link_elements": [],
+            "hidden": false,
+            "require_auth": false
+        }
+    ]
+}
