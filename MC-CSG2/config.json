@@ -4,7 +4,7 @@
         "title": "Media Courier UF",
         "additional_code": "mcufmgmt.py",
         "theme": "thinandtall",
-        "domain_name": "beta.mediacourier.work"
+        "domain_name": "mediacourier.internal.local"
     },
     "pages": [
         {
