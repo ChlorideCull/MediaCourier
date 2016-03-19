@@ -1,3 +1,4 @@
+import instanceconfig
 from bottle import HTTPResponse, template
 
 @csg2api.route("/api/auth/streamer")
@@ -18,7 +19,7 @@ def authviewer():
 
 @csg2api.route("/watch/<filepath:path>")
 def showstream(filepath):
-    return template("stream.tpl", streamuri="rtmp://255.255.255.255/", jwplayerkey="nokeyforu")
+    return template("stream.tpl", streamuri=instanceconfig.streampath.format(filepath), jwplayerkey=instanceconfig.jwplayerkey)
 
 @csg2api.auth
 def authsite(user, passwd):
