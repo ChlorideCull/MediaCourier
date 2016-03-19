@@ -1,4 +1,5 @@
 import instanceconfig
+import mysqldbconn
 from bottle import HTTPResponse, template
 
 @csg2api.route("/api/auth/streamer")
@@ -23,7 +24,8 @@ def showstream(filepath):
 
 @csg2api.auth
 def authsite(user, passwd):
-    return True
+    conn = mysqldbconn.MCDBConnection()
+    return conn.authenticate_user(user, passwd)
 
 @csg2api.route("/debug/username")
 def showuser():
