@@ -1,12 +1,12 @@
-import dbconf
+import instanceconfig
 import pymysql
 import pymysql.cursors
 
 class MCDBConnection:
     def __init__(self):
-        self.connection = pymysql.connect(host=dbconf.sqlhost,
-            user=dbconf.sqluser,
-            password=dbconf.sqlpass,
+        self.connection = pymysql.connect(host=instanceconfig.sqlhost,
+            user=instanceconfig.sqluser,
+            password=instanceconfig.sqlpass,
             db='mediacourier',
             charset='utf8',
             cursorclass=pymysql.cursors.DictCursor)
