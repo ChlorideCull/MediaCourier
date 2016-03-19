@@ -2,3 +2,4 @@
 !**/.idea/misc.xml
 build/
 **/__pycache__/
+MC-CSG2/dbconf.py
