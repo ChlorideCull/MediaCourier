@@ -11,7 +11,7 @@ class MCDBConnection:
             charset='utf8',
             cursorclass=pymysql.cursors.DictCursor)
             
-    def authenticate_user(username, password):
+    def authenticate_user(self, username, password):
         cur = self.connection.cursor()
         cur.execute("SELECT passwdhash,salt FROM oosers WHERE username=%(username)s LIMIT 1", {"username": username})
         
@@ -30,7 +30,7 @@ class MCDBConnection:
         else:
             return False
     
-    def authenticate_streamkey(key):
+    def authenticate_streamkey(self, key):
         cur = self.connection.cursor()
         cur.execute("SELECT username FROM oosers WHERE streamkey=%(streamkey)s LIMIT 1", {"streamkey": key})
         try:
@@ -40,7 +40,7 @@ class MCDBConnection:
         cur.close()
         return retrow["username"]
     
-    def create_new_streamkey(username):
+    def create_new_streamkey(self, username):
         cur = self.connection.cursor()
         cur.execute("UPDATE oosers SET streamkey=SHA1(FLOOR(RAND() * 4294967295)) WHERE username=%(username)s LIMIT 1", {"username": username})
         self.connection.commit()
@@ -48,7 +48,7 @@ class MCDBConnection:
             return False
         return True
 
-    def get_streamkey(username):
+    def get_streamkey(self, username):
         cur = self.connection.cursor()
         cur.execute("SELECT streamkey FROM oosers WHERE username=%(username)s LIMIT 1", {"username": username})
         try:
