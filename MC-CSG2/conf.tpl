@@ -1,4 +1,5 @@
 % import mysqldbconn
+% from datetime import timezone, datetime
 % conn = mysqldbconn.MCDBConnection()
 <div class="contentbox"> 
     <table>
@@ -13,11 +14,11 @@
         % userinfo = conn.get_user_info(csg2api.get_username_of_request())
         <tr>
             <td>Registered at</td>
-            <td>{{userinfo["registered"]}}</td>
+            <td>{{'{:%Y-%m-%d %H:%M:%S} UTC'.format(datetime.fromtimestamp(userinfo["registered"], tz=timezone.utc))}}</td>
         </tr>
         <tr>
             <td>Last logged in at</td>
-            <td>{{userinfo["lastonline"]}}</td>
+            <td>{{'{:%Y-%m-%d %H:%M:%S} UTC'.format(datetime.fromtimestamp(userinfo["lastonline"], tz=timezone.utc))}}</td>
         </tr>
         <tr>
             <td>Privilege level</td>
