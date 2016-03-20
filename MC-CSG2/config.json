@@ -17,7 +17,7 @@
         {
             "title": "Settings",
             "path": "conf",
-            "link_elements": [('stylesheet', '/sass/config.scss')],
+            "link_elements": [["stylesheet", "/sass/config.scss"]],
             "hidden": false,
             "require_auth": true
         },
