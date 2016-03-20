@@ -10,7 +10,7 @@
             <td>Stream Key</td>
             <td>{{conn.get_streamkey(csg2api.get_username_of_request())}}</td>
         </tr>
-        % userinfo = mysqldbconn.get_user_info(csg2api.get_username_of_request())
+        % userinfo = conn.get_user_info(csg2api.get_username_of_request())
         <tr>
             <td>Registered at</td>
             <td>{{userinfo["registered"]}}</td>
