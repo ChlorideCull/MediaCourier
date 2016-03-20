@@ -4,7 +4,12 @@ from bottle import HTTPResponse, template
 
 @csg2api.route("/api/auth/streamer")
 def authstreamer():
-    isvalid = True
+    rqst = csg2api.get_request()
+    streamer = rqst.forms.name
+    streamkey = rqst.forms.key
+    
+    conn = mysqldbconn.MCDBConnection()
+    isvalid = (conn.authenticate_streamkey(streamkey) == streamer)
     if isvalid:
         return HTTPResponse("Authorized", status=200)
     else:
