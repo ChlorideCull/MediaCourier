@@ -36,7 +36,7 @@ class MCDBConnection:
         try:
             retrow = cur.fetchone()
         except:
-            return False
+            return ''
         cur.close()
         return retrow["username"]
     
@@ -54,6 +54,16 @@ class MCDBConnection:
         try:
             retrow = cur.fetchone()
         except:
-            return False
+            return ''
         cur.close()
         return retrow["streamkey"]
+    
+    def get_user_info(self, username):
+        cur = self.connection.cursor()
+        cur.execute("SELECT lastonline,registered,userlevel FROM oosers WHERE username=%(username)s LIMIT 1", {"username": username})
+        try:
+            retrow = cur.fetchone()
+        except:
+            return False
+        cur.close()
+        return retrow
