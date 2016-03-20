@@ -1,6 +1,7 @@
 import instanceconfig
 import pymysql
 import pymysql.cursors
+import hashlib
 
 class MCDBConnection:
     def __init__(self):
@@ -20,9 +21,8 @@ class MCDBConnection:
         except:
             return False
         
-        cur.execute("SELECT sha2(%(hashin)s, 512)", {"hashin": retrow["salt"] + ":" + password})
-        hashrow = cur.fetchone()
-        if hashrow[0] == retrow["passwdhash"]:
+        hash = hashlib.sha512(str(str(retrow["salt"]) + ":" + password).encode('utf-8')).hexdigest()
+        if hash == retrow["passwdhash"]:
             cur.execute("UPDATE oosers SET lastonline=UNIX_TIMESTAMP() WHERE username=%(username)s LIMIT 1", {"username": username})
             cur.close()
             self.connection.commit()
