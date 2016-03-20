@@ -30,11 +30,12 @@
 </div>
 <div class="contentbox">
     <h2>Configuring your streaming client</h2>
-    <div class="contentbox">
+    <div class="contentbox" style="margin: 15px;">
         <b>Your streaming URI: </b>
         <pre>{{instanceconfig.streampath.format(csg2api.get_username_of_request()) + "?key={}".format(streamkey)}}</pre>
     </div>
     <p>
+        New to streaming? Don't know what to use?
         Media Courier UF recommends <a href="https://obsproject.com/download#mp">OBS Studio</a>.
     </p>
     <h3>OBS Studio</h3>
@@ -49,7 +50,7 @@
         <img src="http://i.imgur.com/Wcg4C9q.png" />
         <br>
         <br>
-        <i>Step 3)</i> Select "Custom Streaming Server".
+        <i>Step 3)</i> Set Stream Type to "Custom Streaming Server".
         <br>
         <img src="http://i.imgur.com/XFtXdaf.png" />
         <br>
