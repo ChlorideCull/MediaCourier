@@ -11,7 +11,7 @@ def print_status(leftstring, isgood, rightstring="\u2588"):
 
 def init_parser_for_action(actionsel, actiondesc):
     argparser = argparse.ArgumentParser(description="Manage the MediaCourier Installation.")
-    argparser.add_argument('action', metavar=actionsel, action='store_const', const=actionsel, help=actiondesc)
+    argparser.add_argument('action', metavar=actionsel, help=actiondesc)
     return argparser
 
 def parse_all_args():
