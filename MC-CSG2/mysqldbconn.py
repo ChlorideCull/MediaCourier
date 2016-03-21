@@ -82,7 +82,7 @@ class MCDBConnection:
     def set_password(self, userid, password):
         randsalt = ''
         randgen = random.SystemRandom()
-        for i in range(0, 8):
+        for i in range(0, 16):
             randsalt += randgen.choice('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!"#¤%&/()=?`')
         cur = self.connection.cursor()
         cur.execute("UPDATE oosers SET salt=%(salt)s,passwdhash=%(hash)s WHERE userid=%(userid)s LIMIT 1", {
