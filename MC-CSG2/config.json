@@ -35,7 +35,7 @@
             "title": "Profile",
             "navpath": "profile/%%",
             "path": "profile.tpl",
-            "link_elements": [],
+            "link_elements": [["stylesheet", "/sass/accesspass.scss"]],
             "position": "hidden",
             "require_auth": false
         },
@@ -43,7 +43,7 @@
             "title": "My Profile",
             "navpath": "profile/",
             "path": "profile.tpl",
-            "link_elements": [],
+            "link_elements": [["stylesheet", "/sass/accesspass.scss"]],
             "position": "cog",
             "require_auth": true
         }

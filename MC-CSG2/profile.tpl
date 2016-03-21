@@ -10,18 +10,20 @@
 <div class="contentbox">
     <div class="accesspass">
         <h3>{{userinfo["userlevel"]}}</h3>
-        <img src="{{userinfo["avatarurl"]}}"></img>
-        <h1>{{pathargs[0]}}</h1>
-        <h2>#{{userid}}</h2>
-        <table>
-            <tr>
-                <td>Registered at</td>
-                <td>{{'{:%Y-%m-%d %H:%M:%S} UTC'.format(datetime.fromtimestamp(userinfo["registered"], tz=timezone.utc))}}</td>
-            </tr>
-            <tr>
-                <td>Last logged in at</td>
-                <td>{{'{:%Y-%m-%d %H:%M:%S} UTC'.format(datetime.fromtimestamp(userinfo["lastonline"], tz=timezone.utc))}}</td>
-            </tr>
-        </table>
+        <div class="inner">
+            <img src="{{userinfo["avatarurl"]}}"></img>
+            <h1>{{pathargs[0]}}</h1>
+            <h2>#{{userid}}</h2>
+            <table>
+                <tr>
+                    <td>Registered at</td>
+                    <td>{{'{:%Y-%m-%d %H:%M:%S} UTC'.format(datetime.fromtimestamp(userinfo["registered"], tz=timezone.utc))}}</td>
+                </tr>
+                <tr>
+                    <td>Last logged in at</td>
+                    <td>{{'{:%Y-%m-%d %H:%M:%S} UTC'.format(datetime.fromtimestamp(userinfo["lastonline"], tz=timezone.utc))}}</td>
+                </tr>
+            </table>
+        </div>
     </div>
 </div>

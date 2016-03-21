@@ -1,0 +1,22 @@
+.accesspass {
+    display: inline-block;
+    background-color: #FFF;
+    color: #000;
+    width: 270px;
+
+    .inner {
+        padding: 10px;
+        margin: 0;
+        border: 0;
+    }
+    
+    h3 {
+        text-align: center;
+        background-color: #F33;
+    }
+    
+    img {
+        width: 250px;
+        height: 250px;
+    }
+}
