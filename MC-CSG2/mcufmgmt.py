@@ -45,7 +45,7 @@ def changeusername():
         return False
     if conn.set_username(userid, rqst.forms.newusername):
         csg2api.get_response().status = "303 Login again"
-        response.set_header("Location", "/auth/logout")
+        csg2api.get_response().set_header("Location", "/auth/logout")
         return True
     else:
         return False
@@ -62,7 +62,7 @@ def changepassword():
         return False
     if conn.set_password(userid, rqst.forms.newpassword):
         csg2api.get_response().status = "303 Login again"
-        response.set_header("Location", "/auth/logout")
+        csg2api.get_response().set_header("Location", "/auth/logout")
         return True
     else:
         return False
