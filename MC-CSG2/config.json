@@ -26,7 +26,7 @@
         {
             "title": "Watch",
             "navpath": "watch/%%",
-            "path": "watch.tpl",
+            "path": "stream.tpl",
             "link_elements": [],
             "position": "hidden",
             "require_auth": false
