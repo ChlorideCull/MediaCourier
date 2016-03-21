@@ -1,37 +1,12 @@
 % import mysqldbconn
 % import instanceconfig
-% from datetime import timezone, datetime
 % conn = mysqldbconn.MCDBConnection()
-<div class="contentbox"> 
-    <table>
-        <tr>
-            <td>Username</td>
-            <td>{{csg2api.get_username_of_request()}}</td>
-        </tr>
-        <tr>
-            <td>Stream Key</td>
-        % streamkey = conn.get_streamkey(csg2api.get_username_of_request())
-            <td>{{streamkey}}</td>
-        </tr>
-        % userinfo = conn.get_user_info(csg2api.get_username_of_request())
-        <tr>
-            <td>Registered at</td>
-            <td>{{'{:%Y-%m-%d %H:%M:%S} UTC'.format(datetime.fromtimestamp(userinfo["registered"], tz=timezone.utc))}}</td>
-        </tr>
-        <tr>
-            <td>Last logged in at</td>
-            <td>{{'{:%Y-%m-%d %H:%M:%S} UTC'.format(datetime.fromtimestamp(userinfo["lastonline"], tz=timezone.utc))}}</td>
-        </tr>
-        <tr>
-            <td>Privilege level</td>
-            <td>{{userinfo["userlevel"]}}</td>
-        </tr>
-    </table>
-</div>
+% userid = conn.get_userid(csg2api.get_username_of_request())
 <div class="contentbox">
     <h2>Configuring your streaming client</h2>
     <div class="contentbox" style="margin: 15px;">
         <b>Your streaming URI: </b>
+        % streamkey = conn.get_streamkey(userid)
         <pre>{{instanceconfig.streampath.format(csg2api.get_username_of_request()) + "?key={}".format(streamkey)}}</pre>
     </div>
     <p>

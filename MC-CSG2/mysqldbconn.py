@@ -12,9 +12,9 @@ class MCDBConnection:
             charset='utf8',
             cursorclass=pymysql.cursors.DictCursor)
             
-    def authenticate_user(self, username, password):
+    def authenticate_user(self, userid, password):
         cur = self.connection.cursor()
-        cur.execute("SELECT passwdhash,salt FROM oosers WHERE username=%(username)s LIMIT 1", {"username": username})
+        cur.execute("SELECT passwdhash,salt FROM oosers WHERE userid=%(userid)i LIMIT 1", {"userid": userid})
         
         try:
             retrow = cur.fetchone()
@@ -23,7 +23,7 @@ class MCDBConnection:
         
         hash = hashlib.sha512(str(str(retrow["salt"]) + ":" + password).encode('utf-8')).hexdigest()
         if hash == retrow["passwdhash"]:
-            cur.execute("UPDATE oosers SET lastonline=UNIX_TIMESTAMP() WHERE username=%(username)s LIMIT 1", {"username": username})
+            cur.execute("UPDATE oosers SET lastonline=UNIX_TIMESTAMP() WHERE userid=%(userid)i LIMIT 1", {"userid": userid})
             cur.close()
             self.connection.commit()
             return True
@@ -40,17 +40,17 @@ class MCDBConnection:
         cur.close()
         return retrow["username"]
     
-    def create_new_streamkey(self, username):
+    def create_new_streamkey(self, userid):
         cur = self.connection.cursor()
-        cur.execute("UPDATE oosers SET streamkey=SHA1(FLOOR(RAND() * 4294967295)) WHERE username=%(username)s LIMIT 1", {"username": username})
+        cur.execute("UPDATE oosers SET streamkey=SHA1(FLOOR(RAND() * 4294967295)) WHERE userid=%(userid)i LIMIT 1", {"userid": userid})
         self.connection.commit()
         if cur.rowcount < 1:
             return False
         return True
 
-    def get_streamkey(self, username):
+    def get_streamkey(self, userid):
         cur = self.connection.cursor()
-        cur.execute("SELECT streamkey FROM oosers WHERE username=%(username)s LIMIT 1", {"username": username})
+        cur.execute("SELECT streamkey FROM oosers WHERE userid=%(userid)i LIMIT 1", {"userid": userid})
         try:
             retrow = cur.fetchone()
         except:
@@ -58,12 +58,22 @@ class MCDBConnection:
         cur.close()
         return retrow["streamkey"]
     
-    def get_user_info(self, username):
+    def get_user_info(self, userid):
         cur = self.connection.cursor()
-        cur.execute("SELECT lastonline,registered,userlevel FROM oosers WHERE username=%(username)s LIMIT 1", {"username": username})
+        cur.execute("SELECT username,lastonline,registered,userlevel,avatarurl FROM oosers WHERE userid=%(userid)i LIMIT 1", {"userid": userid})
         try:
             retrow = cur.fetchone()
         except:
             return False
         cur.close()
         return retrow
+        
+    def get_userid(self, username):
+        cur = self.connection.cursor()
+        cur.execute("SELECT userid FROM oosers WHERE username=%(username)s LIMIT 1", {"username": username})
+        try:
+            retrow = cur.fetchone()
+        except:
+            return ''
+        cur.close()
+        return retrow["userid"]
