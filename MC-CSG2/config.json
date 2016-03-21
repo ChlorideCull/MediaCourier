@@ -1,5 +1,5 @@
 {
-    "version": 2,
+    "version": 3,
     "site": {
         "title": "Media Courier UF",
         "additional_code": "mcufmgmt.py",
@@ -9,23 +9,26 @@
     "pages": [
         {
             "title": "Home",
-            "path": "index",
+            "navpath": "index",
+            "path": "index.tpl",
             "link_elements": [],
-            "hidden": false,
+            "position": "navbar",
             "require_auth": false
         },
         {
             "title": "Settings",
-            "path": "conf",
+            "navpath": "settings/",
+            "path": "conf.tpl",
             "link_elements": [["stylesheet", "/sass/config.scss"]],
-            "hidden": false,
+            "position": "cog",
             "require_auth": true
         },
         {
             "title": "Watch",
-            "path": "watch",
+            "navpath": "watch/%%",
+            "path": "watch.tpl",
             "link_elements": [],
-            "hidden": false,
+            "position": "hidden",
             "require_auth": false
         }
     ]
