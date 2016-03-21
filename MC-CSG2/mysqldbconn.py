@@ -74,6 +74,6 @@ class MCDBConnection:
         try:
             retrow = cur.fetchone()
         except:
-            return ''
+            return -1
         cur.close()
-        return int(retrow["userid"], 10)
+        return int(retrow["userid"])

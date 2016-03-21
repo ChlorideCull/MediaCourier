@@ -31,7 +31,7 @@ def showstream(filepath):
 def authsite(user, passwd):
     conn = mysqldbconn.MCDBConnection()
     userid = conn.get_userid(user)
-    return conn.authenticate_user(user, passwd)
+    return conn.authenticate_user(userid, passwd)
 
 @csg2api.route("/debug/username")
 def showuser():
