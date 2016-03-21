@@ -14,7 +14,7 @@ class MCDBConnection:
             
     def authenticate_user(self, userid, password):
         cur = self.connection.cursor()
-        cur.execute("SELECT passwdhash,salt FROM oosers WHERE userid=%(userid)i LIMIT 1", {"userid": int(userid)})
+        cur.execute("SELECT passwdhash,salt FROM oosers WHERE userid=%(userid)s LIMIT 1", {"userid": int(userid)})
         
         try:
             retrow = cur.fetchone()
@@ -23,7 +23,7 @@ class MCDBConnection:
         
         hash = hashlib.sha512(str(str(retrow["salt"]) + ":" + password).encode('utf-8')).hexdigest()
         if hash == retrow["passwdhash"]:
-            cur.execute("UPDATE oosers SET lastonline=UNIX_TIMESTAMP() WHERE userid=%(userid)i LIMIT 1", {"userid": int(userid)})
+            cur.execute("UPDATE oosers SET lastonline=UNIX_TIMESTAMP() WHERE userid=%(userid)s LIMIT 1", {"userid": int(userid)})
             cur.close()
             self.connection.commit()
             return True
@@ -42,7 +42,7 @@ class MCDBConnection:
     
     def create_new_streamkey(self, userid):
         cur = self.connection.cursor()
-        cur.execute("UPDATE oosers SET streamkey=SHA1(FLOOR(RAND() * 4294967295)) WHERE userid=%(userid)i LIMIT 1", {"userid": int(userid)})
+        cur.execute("UPDATE oosers SET streamkey=SHA1(FLOOR(RAND() * 4294967295)) WHERE userid=%(userid)s LIMIT 1", {"userid": int(userid)})
         self.connection.commit()
         if cur.rowcount < 1:
             return False
@@ -50,7 +50,7 @@ class MCDBConnection:
 
     def get_streamkey(self, userid):
         cur = self.connection.cursor()
-        cur.execute("SELECT streamkey FROM oosers WHERE userid=%(userid)i LIMIT 1", {"userid": int(userid)})
+        cur.execute("SELECT streamkey FROM oosers WHERE userid=%(userid)s LIMIT 1", {"userid": int(userid)})
         try:
             retrow = cur.fetchone()
         except:
@@ -60,7 +60,7 @@ class MCDBConnection:
     
     def get_user_info(self, userid):
         cur = self.connection.cursor()
-        cur.execute("SELECT username,lastonline,registered,userlevel,avatarurl FROM oosers WHERE userid=%(userid)i LIMIT 1", {"userid": int(userid)})
+        cur.execute("SELECT username,lastonline,registered,userlevel,avatarurl FROM oosers WHERE userid=%(userid)s LIMIT 1", {"userid": int(userid)})
         try:
             retrow = cur.fetchone()
         except:
