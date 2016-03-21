@@ -76,4 +76,4 @@ class MCDBConnection:
         except:
             return ''
         cur.close()
-        return retrow["userid"]
+        return int(retrow["userid"], 10)
