@@ -2,6 +2,7 @@ import instanceconfig
 import pymysql
 import pymysql.cursors
 import hashlib
+import random
 
 class MCDBConnection:
     def __init__(self):
@@ -77,3 +78,27 @@ class MCDBConnection:
             return -1
         cur.close()
         return int(retrow["userid"])
+
+    def set_password(self, userid, password):
+        randsalt = ''
+        randgen = random.SystemRandom()
+        for i in range(0, 8):
+            randsalt += randgen.choice('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!"#¤%&/()=?`')
+        cur = self.connection.cursor()
+        cur.execute("UPDATE oosers SET salt=%(salt)s,passwdhash=%(hash)s WHERE userid=%(userid)s LIMIT 1", {
+            "salt": randsalt,
+            "hash": hashlib.sha512(str(randsalt + ":" + password).encode('utf-8')).hexdigest(),
+            "userid": int(userid)
+        })
+        self.connection.commit()
+        if cur.rowcount < 1:
+            return False
+        return True
+    
+    def set_username(self, userid, newusername):
+        cur = self.connection.cursor()
+        cur.execute("UPDATE oosers SET username=%(username)s WHERE userid=%(userid)s LIMIT 1", {"userid": int(userid), "username": newusername})
+        self.connection.commit()
+        if cur.rowcount < 1:
+            return False
+        return True

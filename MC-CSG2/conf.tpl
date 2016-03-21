@@ -3,6 +3,23 @@
 % conn = mysqldbconn.MCDBConnection()
 % userid = conn.get_userid(csg2api.get_username_of_request())
 <div class="contentbox">
+    <h2>Change Username</h2>
+    <p>Remember that you need to type this exactly the same way as here in order to log in.</p>
+    <form action="/auth/changeusername" method="post">
+        <input name="newusername" placeholder="New Password" type="text">
+        <input value="Submit" type="submit">
+    </form>
+</div>
+<div class="contentbox">
+    <h2>Change Password</h2>
+    <p>Remember that you need to type this exactly the same way as here in order to log in.</p>
+    <form action="/auth/changepassword" method="post">
+        <input name="newpassword" placeholder="New Password" type="password">
+        <input name="newpasswordagain" placeholder="New Password Again" type="password">
+        <input value="Submit" type="submit">
+    </form>
+</div>
+<div class="contentbox">
     <h2>Configuring your streaming client</h2>
     <div class="contentbox" style="margin: 15px;">
         <b>Your streaming URI: </b>

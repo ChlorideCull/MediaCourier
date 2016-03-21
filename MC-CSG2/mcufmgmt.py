@@ -33,7 +33,26 @@ def authsite(user, passwd):
     userid = conn.get_userid(user)
     return conn.authenticate_user(userid, passwd)
 
-@csg2api.route("/debug/username")
-def showuser():
-    return csg2api.get_username_of_request()
+# DB MODIFICATION API
 
+@csg2api.route("/auth/changeusername", method="POST")
+def changeusername():
+    username = csg2api.get_username_of_request()
+    conn = mysqldbconn.MCDBConnection()
+    userid = conn.get_userid(username)
+    rqst = csg2api.get_request()
+    if rqst.forms.newusername == '':
+        return False
+    return conn.set_username(userid, rqst.forms.newusername)
+
+@csg2api.route("/auth/changepassword", method="POST")
+def changepassword():
+    username = csg2api.get_username_of_request()
+    conn = mysqldbconn.MCDBConnection()
+    userid = conn.get_userid(username)
+    rqst = csg2api.get_request()
+    if rqst.forms.newpassword == '':
+        return False
+    if rqst.forms.newpassword != rqst.forms.newpasswordagain:
+        return False
+    return conn.set_password(userid, rqst.forms.newpassword)
