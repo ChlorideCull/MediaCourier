@@ -43,7 +43,12 @@ def changeusername():
     rqst = csg2api.get_request()
     if rqst.forms.newusername == '':
         return False
-    return conn.set_username(userid, rqst.forms.newusername)
+    if conn.set_username(userid, rqst.forms.newusername):
+        csg2api.get_response().status = "303 Login again"
+        response.set_header("Location", "/auth/logout")
+        return True
+    else:
+        return False
 
 @csg2api.route("/auth/changepassword", method="POST")
 def changepassword():
@@ -55,4 +60,9 @@ def changepassword():
         return False
     if rqst.forms.newpassword != rqst.forms.newpasswordagain:
         return False
-    return conn.set_password(userid, rqst.forms.newpassword)
+    if conn.set_password(userid, rqst.forms.newpassword):
+        csg2api.get_response().status = "303 Login again"
+        response.set_header("Location", "/auth/logout")
+        return True
+    else:
+        return False
