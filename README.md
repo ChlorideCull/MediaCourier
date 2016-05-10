@@ -1,5 +1,5 @@
 #Media Courier
-Media Courier is a streaming server designed by Media Courier UF, a company in the [Junior Achievement Sweden](http://www.ungforetagsamhet.se/om-oss/about-junior-achievement-sweden) program, for use in the period between 12-2015 and 5-2016.
+Media Courier is a streaming server designed by Media Courier UF, a company in the [Junior Achievement Sweden](http://www.ungforetagsamhet.se/om-oss/about-junior-achievement-sweden) program, for use in the period between 12-2015 and 5-2016. It is licensed under the AGPL, version 3.
 
 ##Advisory
 **Media Courier is still under heavy active development, and is not recommended for production use yet. Files and packages mentioned in this or other documents may actually not exist yet.**
